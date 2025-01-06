@@ -441,6 +441,11 @@ app.get('/', (req, res) => {
 
 app.set('trust proxy', 1); // Trust the first proxy (use `1` if behind a single proxy)
 
+
+app.get('/status', (req, res) => {
+    res.json({ status: 'online' });
+  });
+
 // Start server
 app.listen(port, () => console.log(`Server listening on port ${port}`));
 
