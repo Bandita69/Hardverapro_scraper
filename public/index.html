@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' i.imgur.com; font-src 'self'">
+    <title>PC alkatrészek árai</title>
+    <link rel="stylesheet" href="styles.css">
+	<link rel="shortcut icon" href="#" />
+	
+</head>
+<body>
+	
+    
+    <div class="container">
+        <h1>PC alkatrészek árai</h1>
+        <div class="content">
+            <div class="left">
+               <form>
+				 
+				<div class="input-group">
+					
+					<select class="form-control category-select">
+						<option value="processzor">Processzor</option>
+						<option value="alaplap">Alaplap</option>
+						<option value="memoria/asztali_gep_ram">Memória</option>
+						<option value="videokartya">Videokártya</option>
+						<option value="merevlemez_ssd/merevlemez">HDD</option>
+						<option value="merevlemez_ssd/SSD">SSD</option>
+						<option value="haz_tapegyseg">Ház, táp</option>
+					</select>
+					<input type="text" placeholder="Keresett alkatrész">
+				</div>
+				<div class="input-group">
+					
+					<select class="form-control category-select">
+						<option value="alaplap">Alaplap</option>
+						<option value="processzor">Processzor</option>
+						<option value="memoria/asztali_gep_ram">Memória</option>
+						<option value="videokartya">Videokártya</option>
+						<option value="merevlemez_ssd/merevlemez">HDD</option>
+						<option value="merevlemez_ssd/SSD">SSD</option>
+						<option value="haz_tapegyseg">Ház, táp</option>
+					</select>
+					<input type="text" placeholder="Keresett alkatrész">
+				</div>
+				<div class="input-group">
+					
+					<select class="form-control category-select">
+						<option value="memoria/asztali_gep_ram">Memória</option>
+						<option value="processzor">Processzor</option>
+						<option value="alaplap">Alaplap</option>
+						<option value="videokartya">Videokártya</option>
+						<option value="merevlemez_ssd/merevlemez">HDD</option>
+						<option value="merevlemez_ssd/SSD">SSD</option>
+						<option value="haz_tapegyseg">Ház, táp</option>
+					</select>
+					<input type="text" placeholder="Keresett alkatrész">
+				</div>
+				<div class="input-group">
+					
+					<select class="form-control category-select">
+						<option value="videokartya">Videokártya</option>
+						<option value="processzor">Processzor</option>
+						<option value="alaplap">Alaplap</option>
+						<option value="memoria/asztali_gep_ram">Memória</option>
+						<option value="merevlemez_ssd/merevlemez">HDD</option>
+						<option value="merevlemez_ssd/SSD">SSD</option>
+						<option value="haz_tapegyseg">Ház, táp</option>
+					</select>
+					<input type="text" placeholder="Keresett alkatrész">
+				</div>
+				<div class="input-group">
+					
+					<select class="form-control category-select">
+						<option value="merevlemez_ssd/SSD">SSD</option>
+						<option value="merevlemez_ssd/merevlemez">HDD</option>
+						<option value="processzor">Processzor</option>
+						<option value="alaplap">Alaplap</option>
+						<option value="memoria/asztali_gep_ram">Memória</option>
+						<option value="videokartya">Videokártya</option>
+						<option value="haz_tapegyseg">Ház, táp</option>
+					</select>
+					<input type="text" placeholder="Keresett alkatrész">
+				</div>
+				<div class="input-group">
+					
+					<select class="form-control category-select">
+						<option value="haz_tapegyseg">Ház, táp</option>
+						<option value="processzor">Processzor</option>
+						<option value="alaplap">Alaplap</option>
+						<option value="memoria/asztali_gep_ram">Memória</option>
+						<option value="videokartya">Videokártya</option>
+						<option value="merevlemez_ssd/merevlemez">HDD</option>
+						<option value="merevlemez_ssd/SSD">SSD</option>
+					</select>
+					<input type="text" placeholder="Keresett alkatrész">
+				</div>
+			</form>
+			<button class="add-button" type="button">+ Elem hozzá adása</button>
+			<div class="button-group">
+				<button class="search-button" type="button" aria-label="Keresés gomb">Keresés (Enter)</button>
+				<button class="average-price-button" type="button" id="average-price-button" aria-label="Átlagár gomb">Átlagár</button>
+				<button type="button" class="clear-all-button" aria-label="Összes elem törlése gomb">Összes törlése</button>
+			</div>
+				
+            </div>
+			<div class="right">
+				<h3>Javasolt alkatrészek:</h3>
+				<ul>
+					<li>Processzor(CPU) érdemes előtaggal és nélküle is keresni (i3-, i5-) </li>
+					<li>Alaplap</li>
+					<li>Memória (RAM) érdemes több kombinációt is kipróbálni (2x16/4x8/32gb) </li>
+					<li>Videokártya</li>
+					<li>Tárhely (HDD or SSD)</li>
+					<li>Tápegység (PSU)</li>
+				</ul>
+				
+				<div id="status-message"></div>
+				<!-- Scrollable container for results -->
+				<div id="recommendations-container">
+					<div id="recommendations">
+						<!-- Results will be dynamically injected here -->
+					</div>
+				</div>
+			</div>
+        </div>
+		<footer>
+			<div class="contact-info">
+				
+			</div>
+		</footer>
+    
+	</div>
+
+<script src="script.js"></script>
+</body>
+
+</html>
