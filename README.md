@@ -6,6 +6,12 @@ Egy kereső a hardverapro.hu-hoz, komplett pc-k beárazásához is.
 
 ![todo](https://github.com/user-attachments/assets/10ec6f87-edc1-4b45-9553-4212959598f8)
 
+# Demo
+
+distinct-poorly-platypus.ngrok-free.app
+
+# Lokális futtatáshoz
+
 ```bash
 # Klónozd ezt a repositoryt (ha még nem tetted meg)
 $ git clone https://github.com/Bandita69/Hardverapro_scraper.git
