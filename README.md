@@ -8,7 +8,9 @@ Egy kereső a hardverapro.hu-hoz, komplett pc-k beárazásához is.
 
 # Demo
 
-distinct-poorly-platypus.ngrok-free.app
+https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdistinct-poorly-platypus.ngrok-free.app%2Fstatus&query=status&label=Demo&color=blue
+
+https://distinct-poorly-platypus.ngrok-free.app
 
 # Lokális futtatáshoz
 
