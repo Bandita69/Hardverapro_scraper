@@ -6,6 +6,7 @@ Egy kereső a hardverapro.hu-hoz, komplett pc-k beárazásához is.
 
 ![todo](https://github.com/user-attachments/assets/10ec6f87-edc1-4b45-9553-4212959598f8)
 
+```bash
 # Klónozd ezt a repositoryt (ha még nem tetted meg)
 $ git clone https://github.com/Bandita69/Hardverapro_scraper.git
 $ cd Hardverapro_scraper
@@ -24,3 +25,4 @@ $ npm install  # Vagy ha a yarn-t használod: yarn install
 
 # Indítsd el a szervert
 $ npm start  # Vagy ha preferálod: node server.js
+```
