@@ -299,9 +299,9 @@ app.get('/scrape', async (req, res) => {
 
 
 app.post('/average-price', async (req, res) => {
-    const searchTerms = req.body; // Get the JSON payload
+    const searchTerms = req.body; 
 
-    // Validate the input (basic validation example)
+    
     if (!Array.isArray(searchTerms) || searchTerms.length === 0) {
         return res.status(400).json({ error: 'Invalid or missing search terms' });
     }
@@ -428,41 +428,41 @@ async function getFilteredListings(query, category, speed, includeMultiGpu) {
         // Handle specific GPU variants (Ti, Super, XT, etc.)
         const lowerQuery = query.toLowerCase();
         if (lowerQuery.includes('ti')) {
-            sql += ` AND is_ti = 1`; // Match only Ti models
+            sql += ` AND is_ti = 1`; 
         } else {
-            sql += ` AND is_ti = 0`; // Exclude Ti models if not specified
+            sql += ` AND is_ti = 0`; 
         }
 
         if (lowerQuery.includes('super')) {
-            sql += ` AND is_super = 1`; // Match only Super models
+            sql += ` AND is_super = 1`; 
         } else {
-            sql += ` AND is_super = 0`; // Exclude Super models if not specified
+            sql += ` AND is_super = 0`;
         }
 
         if (lowerQuery.includes('xt')) {
-            sql += ` AND is_xt = 1`; // Match only XT models
+            sql += ` AND is_xt = 1`; 
         } else {
-            sql += ` AND is_xt = 0`; // Exclude XT models if not specified
+            sql += ` AND is_xt = 0`; 
         }
 
         if (lowerQuery.includes('xtx')) {
-            sql += ` AND is_xtx = 1`; // Match only XTX models
+            sql += ` AND is_xtx = 1`; 
         } else {
-            sql += ` AND is_xtx = 0`; // Exclude XTX models if not specified
+            sql += ` AND is_xtx = 0`; 
         }
 
-        // Add condition for speed if provided
+        
         if (speed) {
             sql += ` AND speed = ?`;
-            params.push(speed); // Add `speed` to the parameters array
+            params.push(speed); 
         }
 
-        // Add condition for multi-GPU support if needed
+        
         if (!includeMultiGpu) {
             sql += ` AND is_multi_gpu = 0`;
         }
 
-        // Execute the query
+        
         db.all(sql, params, (err, rows) => {
             if (err) reject(err);
             resolve(rows);
@@ -472,12 +472,12 @@ async function getFilteredListings(query, category, speed, includeMultiGpu) {
 // Serve static files (HTML, CSS, JS, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Add a route for the home page (optional)
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.set('trust proxy', 1); // Trust the first proxy (use `1` if behind a single proxy)
+app.set('trust proxy', 1); 
 
 
 app.get('/status', (req, res) => {
