@@ -386,6 +386,7 @@ app.get('/search', async (req, res) => {
 // Helper function to get filtered listings 
 async function getFilteredListings(query, category, speed, includeMultiGpu) {
     return new Promise((resolve, reject) => {
+        // Base SQL query
         let sql = `SELECT * FROM listings 
             WHERE (
                 title LIKE ? OR 
@@ -401,30 +402,49 @@ async function getFilteredListings(query, category, speed, includeMultiGpu) {
             `% ${query} %`,  // Surrounded by spaces (middle of title)
             `${query} %`,    // At the start followed by a space
             `% ${query}`,    // At the end preceded by a space
-            `${query}`,      // Exact match (e.g., "3600")
+            `${query}`,      // Exact match (e.g., "4070 Ti")
             `%${query}%`,    // Location search (kept broad)
             category
         ];
-        
-        // Add condition for `is_multi_gpu` if needed
-        if (!includeMultiGpu) {
-            sql += ` AND is_multi_gpu = 0`;
+
+        // Handle specific GPU variants (Ti, Super, XT, etc.)
+        const lowerQuery = query.toLowerCase();
+        if (lowerQuery.includes('ti')) {
+            sql += ` AND is_ti = 1`; // Match only Ti models
+        } else {
+            sql += ` AND is_ti = 0`; // Exclude Ti models if not specified
         }
 
-        // Add conditions for filtering out specific keywords like "ti", "super", etc.
-        if (!query.toLowerCase().includes('ti') &&
-            !query.toLowerCase().includes('super') &&
-            !query.toLowerCase().includes('xt') &&
-            !query.toLowerCase().includes('xtx')) {
-            sql += ` AND is_ti = 0 AND is_super = 0 AND is_xt = 0 AND is_xtx = 0`;
+        if (lowerQuery.includes('super')) {
+            sql += ` AND is_super = 1`; // Match only Super models
+        } else {
+            sql += ` AND is_super = 0`; // Exclude Super models if not specified
         }
 
-        // Add condition for speed if it's provided
+        if (lowerQuery.includes('xt')) {
+            sql += ` AND is_xt = 1`; // Match only XT models
+        } else {
+            sql += ` AND is_xt = 0`; // Exclude XT models if not specified
+        }
+
+        if (lowerQuery.includes('xtx')) {
+            sql += ` AND is_xtx = 1`; // Match only XTX models
+        } else {
+            sql += ` AND is_xtx = 0`; // Exclude XTX models if not specified
+        }
+
+        // Add condition for speed if provided
         if (speed) {
             sql += ` AND speed = ?`;
             params.push(speed); // Add `speed` to the parameters array
         }
 
+        // Add condition for multi-GPU support if needed
+        if (!includeMultiGpu) {
+            sql += ` AND is_multi_gpu = 0`;
+        }
+
+        // Execute the query
         db.all(sql, params, (err, rows) => {
             if (err) reject(err);
             resolve(rows);
