@@ -451,24 +451,4 @@ app.listen(port, () => console.log(`Server listening on port ${port}`));
 
 
 
-// this needs some work
-
-app.get('/clear-database', (req, res) => {
-    db.serialize(() => { // Serialize to ensure operations complete in order
-        db.run("DELETE FROM search_history", (err) => {
-            if (err) {
-                console.error("Error clearing search history:", err);
-                return res.status(500).send("Error clearing database");
-            }
-            db.run("DELETE FROM listings", (err) => {
-                if (err) {
-                    console.error("Error clearing listings:", err);
-                    return res.status(500).send("Error clearing database");
-                }
-                console.log("Database cleared.");
-                res.send("Database cleared successfully");
-            });
-        });
-    });
-});
 
