@@ -2,7 +2,8 @@
 Egy kereső a hardverapro.hu-hoz, komplett pc-k beárazásához is.
 
 
-![hardver](https://github.com/user-attachments/assets/a6f389a1-dc00-4ec5-b928-d0cd4547ac6c)
+![image](https://github.com/user-attachments/assets/f8d70592-f2b6-4806-b021-30025e62fac2)
+
 
 ![todo](https://github.com/user-attachments/assets/10ec6f87-edc1-4b45-9553-4212959598f8)
 
