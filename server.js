@@ -145,6 +145,24 @@ function calculateIQRMean(values) {
     return sum / iqrValues.length;
 }
 
+
+function lowerTrimmedMean(values, lowTrimPercent, highTrimPercent) { // Adjust percentages as needed
+    if (values.length <= 2) { // Need at least 3 values to trim effectively
+        return values.length === 1 ? values[0] : (values.length === 2 ? (values[0] + values[1])/2: 0);
+    }
+
+    const sortedValues = values.slice().sort((a, b) => a - b);
+    const lowTrimCount = Math.floor(sortedValues.length * lowTrimPercent);
+    const highTrimCount = Math.floor(sortedValues.length * highTrimPercent);
+
+    const trimmedValues = sortedValues.slice(lowTrimCount, sortedValues.length - highTrimCount);
+
+    if (trimmedValues.length === 0) return 0; // Handle the case where all values are trimmed
+
+    const sum = trimmedValues.reduce((acc, val) => acc + val, 0);
+    return sum / trimmedValues.length;
+}
+
 async function getListingsFromDatabase(db, query, category, speed) {
   return new Promise((resolve, reject) => {
       let sql = `SELECT title, price FROM listings WHERE title LIKE ? AND is_multi_gpu = 0`;
@@ -309,7 +327,7 @@ app.post('/average-price', async (req, res) => {
             }
 
             const prices = listings.map(listing => parseInt(listing.price, 10)).filter(price => !isNaN(price));
-            const averagePrice = prices.length > 0 ? calculateIQRMean(prices) : 0;
+            const averagePrice = prices.length > 0 ? lowerTrimmedMean(prices, 0.1, 0.3) : 0;
 
             averagePrices.push({ term: searchTerm, category, speed, averagePrice });
         }
