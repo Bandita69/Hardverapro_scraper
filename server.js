@@ -121,16 +121,20 @@ function extractGpuNames(title) {
 
 // Helper function to extract GPU type from the title like ti, super, xt, xtx, etc.
 function extractGpuType(title) {
-    const gpuTypes = ['ti', 'super', 'xt', 'xtx', 'xt+'];
+    const gpuTypes = ['ti', 'super', 'xt', 'xtx'];
+
+    console.log('extractGpuType title:', title);
 
     const matchedTypes = gpuTypes.filter(type => {
-        const regex = new RegExp(`\\b${type}\\b`, 'i');
+        // Match the GPU type only if it follows a number (e.g., "4070xt", "6700 xt")
+        const regex = new RegExp(`\\d+\\s*${type}\\b`, 'i'); // \d+ ensures it follows a number
         return regex.test(title);
     });
 
+    console.log('extractGpuType matchedTypes:', matchedTypes);
+
     return matchedTypes;
 }
-
 
 function calculateIQRMean(values) {
     if (values.length <= 1) return values.length === 1 ? values[0] : 0;
@@ -222,6 +226,8 @@ async function scrapeListings(url, category) {
             // felvásárlás, felvásárlása
             new RegExp('(felv[áa]s[áa]rl[áa]s)', 'i'),
             new RegExp('(felv[áa]s[áa]rl[áa]sa)', 'i'),
+            //cserélném
+            new RegExp('(cser[ée]ln[ée]m)', 'i'),
             'csere', 'keresek', 'elkelt', 'jegelve', 'eladva', 'lapok', 'szerver', 'darab'
         ];
 
@@ -280,7 +286,7 @@ async function scrapeListings(url, category) {
                 const listingId = await new Promise((resolve, reject) => {
                     db.run(
                         'INSERT INTO listings (title, price, location, url, category, is_multi_gpu, is_ti, is_super, is_xt, is_xtx, speed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                        [title, price, location, fullUrl, category, isMultiGpu ? 1 : 0, isTi ? 1 : 0, isSuper ? 1 : 0, isXt ? 1 : 0, isXtx ? 1 : 0, speed],
+                        [title.toLowerCase(), price, location, fullUrl, category, isMultiGpu ? 1 : 0, isTi ? 1 : 0, isSuper ? 1 : 0, isXt ? 1 : 0, isXtx ? 1 : 0, speed],
                         function (err) {
                             if (err) reject(err);
                             resolve(this.lastID);
@@ -394,7 +400,7 @@ app.get('/search', async (req, res) => {
                 db.run(
                     `INSERT INTO search_history (query, category) 
                    VALUES (?, ?)`,
-                    [query, category],
+                    [query.toLowerCase(), category],
                     (err) => {
                         if (err) {
                             console.error("Database update/insert error:", err);
@@ -439,7 +445,7 @@ async function getFilteredListings(query, category, speed, includeMultiGpu) {
                 title LIKE ? OR 
                 title LIKE ? OR 
                 title = ? OR
-                location LIKE ?
+                title LIKE ?
             ) 
             AND category = ?`;
 
@@ -449,7 +455,7 @@ async function getFilteredListings(query, category, speed, includeMultiGpu) {
             `${query} %`,    // At the start followed by a space
             `% ${query}`,    // At the end preceded by a space
             `${query}`,      // Exact match (e.g., "4070 Ti")
-            `%${query}%`,    // Location search (kept broad)
+            `%${query.toUpperCase()}%`,    // nagybetu
             category.toLowerCase()
         ];
 
