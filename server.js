@@ -26,14 +26,16 @@ scrapeQueue.process(async (job) => {
   try {
     
     
+
+
     if (category === '') {
-      searchUrl = `https://hardverapro.hu/aprok/hardver/keres.php?stext=${encodeURIComponent(query)}&category=$&stcid_text=&stcid=&stmid_text=&stmid=&minprice=10&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1`;
-    } else {  
-      searchUrl = `https://hardverapro.hu/aprok/hardver/${category}/keres.php?stext=${encodeURIComponent(query)}&category=$&stcid_text=&stcid=&stmid_text=&stmid=&minprice=10&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1`;
+        await scrapeListings(`https://hardverapro.hu/aprok/hardver/keres.php?stext=${encodeURIComponent(query)}&stcid_text=&stcid=&stmid_text=&stmid=&minprice=10&maxprice=&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1&offset=0`, category);
+    } else { 
+        await scrapeListings(`https://hardverapro.hu/aprok/hardver/${category}/keres.php?stext=${encodeURIComponent(query)}&stcid_text=&stcid=&stmid_text=&stmid=&minprice=10&maxprice=&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1&offset=0`, category);
     }
 
     
-    await scrapeListings(searchUrl, category);
+   
 
     console.log(`Scrape task completed for query: "${query}", category: "${category}"`);
   } catch (err) {
@@ -146,19 +148,35 @@ function calculateIQRMean(values) {
 }
 
 
-function lowerTrimmedMean(values, lowTrimPercent, highTrimPercent) { // Adjust percentages as needed
-    if (values.length <= 2) { // Need at least 3 values to trim effectively
-        return values.length === 1 ? values[0] : (values.length === 2 ? (values[0] + values[1])/2: 0);
+function lowerTrimmedMean(values, lowTrimPercent = 0.1, highTrimPercent = 0.1) {
+    if (values.length <= 2) {
+        // Handle small arrays
+        return values.length === 1 
+            ? values[0] 
+            : (values.length === 2 ? (values[0] + values[1]) / 2 : 0);
     }
 
+    // Sort the values in ascending order
     const sortedValues = values.slice().sort((a, b) => a - b);
+
+    // Handle case where the lowest value is less than half the second lowest
+    if (sortedValues[0] < sortedValues[1] / 2) {
+        sortedValues.shift(); // Remove the first element
+    }
+
+    // Determine how many values to trim based on percentages
     const lowTrimCount = Math.floor(sortedValues.length * lowTrimPercent);
     const highTrimCount = Math.floor(sortedValues.length * highTrimPercent);
 
+    // Trim values from both ends
     const trimmedValues = sortedValues.slice(lowTrimCount, sortedValues.length - highTrimCount);
 
-    if (trimmedValues.length === 0) return 0; // Handle the case where all values are trimmed
+    if (trimmedValues.length === 0) {
+        // Handle the case where all values are trimmed
+        return 0;
+    }
 
+    // Calculate the mean of the remaining values
     const sum = trimmedValues.reduce((acc, val) => acc + val, 0);
     return sum / trimmedValues.length;
 }
@@ -190,6 +208,9 @@ async function getListingsFromDatabase(db, query, category, speed) {
 
 async function scrapeListings(url, category) { 
   try {
+
+      // print the url to the console
+      console.log(url);
       const response = await axios.get(url, { timeout: 10000 }); // Set timeout to avoid long waits
       const $ = cheerio.load(response.data);
 
@@ -203,7 +224,7 @@ async function scrapeListings(url, category) {
           // felvásárlás, felvásárlása
           new RegExp('(felv[áa]s[áa]rl[áa]s)', 'i'),
           new RegExp('(felv[áa]s[áa]rl[áa]sa)', 'i'),
-          'csere', 'keresek', 'elkelt', 'jegelve', 'eladva', 'lapok', 'szerver'
+          'csere', 'keresek', 'elkelt', 'jegelve', 'eladva', 'lapok', 'szerver', 'darab'
       ];
 
       const scrapedUrls = []; // Array to store scraped URLs
@@ -330,7 +351,7 @@ app.post('/average-price', async (req, res) => {
             }
 
             const prices = listings.map(listing => parseInt(listing.price, 10)).filter(price => !isNaN(price));
-            const averagePrice = prices.length > 0 ? lowerTrimmedMean(prices, 0.1, 0.3) : 0;
+            const averagePrice = prices.length > 0 ? lowerTrimmedMean(prices) : 0;
 
             averagePrices.push({ term: searchTerm, category, speed, averagePrice });
         }
@@ -373,9 +394,9 @@ app.get('/search', async (req, res) => {
 
       // if category is empty string, remove one / from the URL   
       if (category === '') {
-          await scrapeListings(`https://hardverapro.hu/aprok/hardver/keres.php?stext=${encodeURIComponent(query)}&category=$&stcid_text=&stcid=&stmid_text=&stmid=&minprice=10&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1`, category);
+          await scrapeListings(`https://hardverapro.hu/aprok/hardver/keres.php?stext=${encodeURIComponent(query)}&stcid_text=&stcid=&stmid_text=&stmid=&minprice=10&maxprice=&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1&offset=0`, category);
       } else { 
-          await scrapeListings(`https://hardverapro.hu/aprok/hardver/${category}/keres.php?stext=${encodeURIComponent(query)}&category=$&stcid_text=&stcid=&stmid_text=&stmid=&minprice=10&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1`, category);
+          await scrapeListings(`https://hardverapro.hu/aprok/hardver/${category}/keres.php?stext=${encodeURIComponent(query)}&stcid_text=&stcid=&stmid_text=&stmid=&minprice=10&maxprice=&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1&offset=0`, category);
       }
 
 
