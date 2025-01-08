@@ -200,6 +200,9 @@ async function scrapeListings(url, category) {
           new RegExp('(hib[áa]s)', 'i'), // hibás, hibas
           new RegExp('(alkatr[ée]sz)', 'i'), // alkatrész, alkatresz
           new RegExp('(f[ée]lkonfig)', 'i'), // félkonfig, felkonfig
+          // felvásárlás, felvásárlása
+          new RegExp('(felv[áa]s[áa]rl[áa]s)', 'i'),
+          new RegExp('(felv[áa]s[áa]rl[áa]sa)', 'i'),
           'csere', 'keresek', 'elkelt', 'jegelve', 'eladva', 'lapok', 'szerver'
       ];
 
