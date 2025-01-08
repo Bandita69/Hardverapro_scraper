@@ -30,7 +30,7 @@ scrapeQueue.process(async (job) => {
         if (category === '') {
             await scrapeListings(`https://hardverapro.hu/aprok/hardver/keres.php?search_exac=1&search_title=1&stext=${encodeURIComponent(query)}&minprice=10&buying=0&noiced=1`, category.toLowerCase());
         } else {
-            await scrapeListings(`https://hardverapro.hu/aprok/hardver/${category.toLowerCase()}/keres.php?stext=${query}&stcid_text=&stcid=&stmid_text=&stmid=&minprice=&maxprice=&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1`, category.toLowerCase());
+            await scrapeListings(`https://hardverapro.hu/aprok/hardver/${category.toLowerCase()}/keres.php?stext=${query}&stcid_text=&stcid=&stmid_text=&stmid=&minprice=10&maxprice=&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1`, category.toLowerCase());
         }
 
         // https://hardverapro.hu/aprok/hardver/merevlemez_ssd/ssd/keres.php?stext=120gb&search_exac=1&search_title=1&minprice=10&buying=0&noiced=1
@@ -394,7 +394,7 @@ app.get('/search', async (req, res) => {
             if (category === '') {
                 await scrapeListings(`https://hardverapro.hu/aprok/hardver/keres.php?search_exac=1&search_title=1&stext=${encodeURIComponent(query)}&minprice=10&buying=0&noiced=1`, category.toLowerCase());
             } else {
-                await scrapeListings(`https://hardverapro.hu/aprok/hardver/${category.toLowerCase()}/keres.php?stext=${query}&stcid_text=&stcid=&stmid_text=&stmid=&minprice=&maxprice=&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1`, category.toLowerCase());
+                await scrapeListings(`https://hardverapro.hu/aprok/hardver/${category.toLowerCase()}/keres.php?stext=${query}&stcid_text=&stcid=&stmid_text=&stmid=&minprice=10&maxprice=&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1`, category.toLowerCase());
             }
 
             const listingsAfterScrape = await getFilteredListings(query, category, speed);
