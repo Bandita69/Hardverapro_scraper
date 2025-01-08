@@ -123,7 +123,7 @@ function extractGpuNames(title) {
 function extractGpuType(title) {
     const gpuTypes = ['ti', 'super', 'xt', 'xtx'];
 
-    console.log('extractGpuType title:', title);
+    
 
     const matchedTypes = gpuTypes.filter(type => {
         // Match the GPU type only if it follows a number (e.g., "4070xt", "6700 xt")
@@ -131,7 +131,7 @@ function extractGpuType(title) {
         return regex.test(title);
     });
 
-    console.log('extractGpuType matchedTypes:', matchedTypes);
+    
 
     return matchedTypes;
 }
@@ -183,30 +183,6 @@ function lowerTrimmedMean(values, lowTrimPercent = 0.1, highTrimPercent = 0.1) {
     return sum / trimmedValues.length;
 }
 
-async function getListingsFromDatabase(db, query, category, speed) {
-    return new Promise((resolve, reject) => {
-        let sql = `SELECT title, price FROM listings WHERE title LIKE ? AND is_multi_gpu = 0`;
-        const params = [`%${query}%`];
-
-        if (category) {
-            sql += ` AND category = ?`;
-            params.push(category.toLowerCase());
-        }
-
-        if (speed) {
-            sql += ` AND speed = ?`;
-            params.push(speed);
-        }
-
-        db.all(sql, params, (err, rows) => {
-            if (err) {
-                console.error("Database error:", err);
-                reject(err);
-            }
-            resolve(rows);
-        });
-    });
-}
 
 async function scrapeListings(url, category) {
     try {
@@ -345,14 +321,14 @@ app.post('/average-price', async (req, res) => {
             }
 
             // Get listings from the database
-            let listings = await getListingsFromDatabase(db, searchTerm, category, speed);
+            let listings = await getFilteredListings(searchTerm, category, speed);
 
             // Scrape if no listings are found
             if (listings.length === 0 && category) {
                 const baseUrl = `${req.protocol}://${req.get('host')}`;
                 const scrapeRes = await axios.get(`${baseUrl}/scrape?q=${encodeURIComponent(searchTerm)}&category=${encodeURIComponent(category)}`);
                 if (scrapeRes.data.includes('Scraping completed')) {
-                    listings = await getListingsFromDatabase(db, searchTerm, category, speed);
+                    listings = await getFilteredListings(searchTerm, category, speed);
                 }
             }
 
@@ -374,7 +350,7 @@ app.get('/search', async (req, res) => {
     const query = req.query.q || '';
     const category = req.query.category.toLowerCase() || '';
     const speed = req.query.speed || '';
-    const includeMultiGpu = req.query.includeMultiGpu === 'true';
+    
 
     try {
 
@@ -393,7 +369,7 @@ app.get('/search', async (req, res) => {
         if (existingSearch) {
             console.log(`Query "${query}" in category "${category}" already searched recently. Using existing data.`);
             console.log('if ag');
-            const listings = await getFilteredListings(query, category, speed, includeMultiGpu);
+            const listings = await getFilteredListings(query, category, speed);
             return res.json(listings);
         } else {
             await new Promise((resolve, reject) => {
@@ -421,7 +397,7 @@ app.get('/search', async (req, res) => {
                 await scrapeListings(`https://hardverapro.hu/aprok/hardver/${category.toLowerCase()}/keres.php?stext=${query}&stcid_text=&stcid=&stmid_text=&stmid=&minprice=&maxprice=&cmpid_text=&cmpid=&usrid_text=&usrid=&buying=0&stext_none=&search_exac=1&search_title=1&noiced=1`, category.toLowerCase());
             }
 
-            const listingsAfterScrape = await getFilteredListings(query, category, speed, includeMultiGpu);
+            const listingsAfterScrape = await getFilteredListings(query, category, speed);
             return res.json(listingsAfterScrape);
         }
 
@@ -434,11 +410,15 @@ app.get('/search', async (req, res) => {
 });
 
 // Helper function to get filtered listings 
-async function getFilteredListings(query, category, speed, includeMultiGpu) {
-    console.log('getFilteredListings, query:', query, 'category:', category, 'speed:', speed, 'includeMultiGpu:', includeMultiGpu);
+async function getFilteredListings(query, category, speed) {
+    console.log('getFilteredListings, query:', query, 'category:', category, 'speed:', speed);
+
+    const lowerQuery = query.toLowerCase();
+    // Preprocess the query to remove GPU suffixes
+    query = preprocessQuery(query);
+
     return new Promise((resolve, reject) => {
         // Base SQL query where title like query
-
         let sql = `SELECT * FROM listings 
             WHERE (
                 title LIKE ? OR 
@@ -454,14 +434,13 @@ async function getFilteredListings(query, category, speed, includeMultiGpu) {
             `% ${query} %`,  // Surrounded by spaces (middle of title)
             `${query} %`,    // At the start followed by a space
             `% ${query}`,    // At the end preceded by a space
-            `${query}`,      // Exact match (e.g., "4070 Ti")
-            `%${query.toUpperCase()}%`,    // nagybetu
+            `${query}`,      // Exact match (e.g., "4070")
+            `%${query.toUpperCase()}%`,    // Uppercase match (e.g., "RTX")
             category.toLowerCase()
         ];
 
-
         // Handle specific GPU variants (Ti, Super, XT, etc.)
-        const lowerQuery = query.toLowerCase();
+        
         if (lowerQuery.includes('ti')) {
             sql += ` AND is_ti = 1`;
         } else {
@@ -474,28 +453,25 @@ async function getFilteredListings(query, category, speed, includeMultiGpu) {
             sql += ` AND is_super = 0`;
         }
 
-        if (lowerQuery.includes('xt')) {
-            sql += ` AND is_xt = 1`;
-        } else {
-            sql += ` AND is_xt = 0`;
-        }
-
+        
         if (lowerQuery.includes('xtx')) {
             sql += ` AND is_xtx = 1`;
+            sql += ` AND is_xt = 0`; // Ensure we don't search for xt if xtx is present
+        } else if (lowerQuery.includes('xt')) {
+            sql += ` AND is_xt = 1`;
+            sql += ` AND is_xtx = 0`; // Ensure we don't search for xtx if xt is present
         } else {
+            sql += ` AND is_xt = 0`;
             sql += ` AND is_xtx = 0`;
-        }
-
-
+}
         if (speed) {
             sql += ` AND speed = ?`;
             params.push(speed);
         }
 
-
-        if (!includeMultiGpu) {
-            sql += ` AND is_multi_gpu = 0`;
-        }
+        
+        sql += ` AND is_multi_gpu = 0`;
+        
 
         console.log('sql:', sql, 'params:', params);
 
@@ -504,6 +480,17 @@ async function getFilteredListings(query, category, speed, includeMultiGpu) {
             resolve(rows);
         });
     });
+}
+
+function preprocessQuery(query) {
+    const gpuTypes = ['ti', 'super', 'xt', 'xtx'];
+
+    // Use a regex to remove GPU suffixes, whether attached or separated by a space
+    const regex = new RegExp(`(\\d+)\\s*(${gpuTypes.join('|')})\\b`, 'gi'); // Match numbers followed by optional space and suffix
+    const cleanedQuery = query.replace(regex, '$1').trim(); // Replace with just the number (e.g., "6700xt" -> "6700")
+
+    console.log('Preprocessed query:', cleanedQuery);
+    return cleanedQuery;
 }
 // Serve static files (HTML, CSS, JS, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
