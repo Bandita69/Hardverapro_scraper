@@ -349,8 +349,14 @@ function addInputField() {
     input.placeholder = 'Keresett alkatrész'; // 
     newInputGroup.appendChild(input);
 
+    input.addEventListener('input', function() {
+        this.value = this.value.toLowerCase();
+    });
+
     form.appendChild(newInputGroup);
 }
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const averageButton = document.getElementById('average-price-button');
@@ -377,7 +383,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initial setup for existing inputs
-    searchInputs.forEach(setupInputValidation);
+    // Initial setup for existing inputs and enforce lowercase
+    searchInputs.forEach(input => {
+        setupInputValidation(input);
+        input.addEventListener('input', function() {
+            this.value = this.value.toLowerCase();
+        });
+    });
 
     //  event listeners
     document.addEventListener('change', function (event) {
