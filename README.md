@@ -35,4 +35,6 @@ $ npm install  # Vagy ha a yarn-t használod: yarn install
 
 # Indítsd el a szervert
 $ npm start  # Vagy ha preferálod: node server.js
+
+# Érdemes néha törölni az adatbázist, hogy új adatokat töltsön bele. (Ezt lehet majd automatizálom)
 ```
