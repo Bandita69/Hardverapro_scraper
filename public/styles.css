@@ -40,9 +40,26 @@ body, html {
 
 h1 {
     text-align: center;
-    margin-bottom: 30px;
     font-size: 24px;
-    color: #333;
+    margin-bottom: 30px;
+    background: linear-gradient(to right, red, green);
+    background-size: 200%;
+    background-position: 0 0;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: colorChange 30s ease-in-out infinite;
+}
+
+@keyframes colorChange {
+    0% {
+        background-position: 0 0;
+    }
+    50% {
+        background-position: -100% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
 }
 
 .content {
