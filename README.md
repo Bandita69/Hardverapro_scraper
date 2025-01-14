@@ -1,5 +1,6 @@
 # Hardverapro_scraper
 Egy kereső a hardverapro.hu-hoz, komplett pc-k beárazásához is.
+Néha elromlik, de igyekszem megjavítani.
 
 
 ![image](https://github.com/user-attachments/assets/f8d70592-f2b6-4806-b021-30025e62fac2)
