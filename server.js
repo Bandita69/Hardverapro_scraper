@@ -8,6 +8,8 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const port = process.env.PORT || 3000;
 
+
+
 app.use(express.json());
 
 
@@ -61,14 +63,16 @@ app.use(
             frameAncestors: ["'self'"],
             imgSrc: ["'self'", "data:", "i.imgur.com"], // Added i.imgur.com here
             objectSrc: ["'none'"],
-            scriptSrc: ["'self'"],
-            "script-src-attr": ["'none'"],
+            scriptSrc: [
+                "'self'",
+                
+            ],
             styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+            "script-src-attr": ["'none'"],
             "upgrade-insecure-requests": [],
         },
     })
 );
-
 
 
 // Rate limiting to prevent abuse of the server
@@ -186,8 +190,6 @@ function lowerTrimmedMean(values, lowTrimPercent = 0.1, highTrimPercent = 0.1) {
 
 async function scrapeListings(url, category) {
     try {
-
-        // print the url to the console
         console.log(url);
         const response = await axios.get(url, { timeout: 10000 }); // Set timeout to avoid long waits
         const $ = cheerio.load(response.data);
@@ -199,18 +201,18 @@ async function scrapeListings(url, category) {
             new RegExp('(hib[áa]s)', 'i'), // hibás, hibas
             new RegExp('(alkatr[ée]sz)', 'i'), // alkatrész, alkatresz
             new RegExp('(f[ée]lkonfig)', 'i'), // félkonfig, felkonfig
-            // felvásárlás, felvásárlása
-            new RegExp('(felv[áa]s[áa]rl[áa]s)', 'i'),
-            new RegExp('(felv[áa]s[áa]rl[áa]sa)', 'i'),
-            //cserélném
-            new RegExp('(cser[ée]ln[ée]m)', 'i'),
-            'csere', 'keresek', 'elkelt', 'jegelve', 'eladva', 'lapok', 'szerver', 'darab'
+            new RegExp('(felv[áa]s[áa]rl[áa]s)', 'i'), // felvásárlás
+            new RegExp('(felv[áa]s[áa]rl[áa]sa)', 'i'), // felvásárlása
+            new RegExp('(cser[ée]ln[ée]m)', 'i'), // cserélném
+            'csere', 'keresek', 'elkelt', 'jegelve', 'eladva', 'lapok', 'szerver', 'darab', 'doboz'
         ];
 
         const scrapedUrls = []; // Array to store scraped URLs
 
         for (const element of listingsArray) {
-            const title = $(element).find('.uad-title h1 a').text().trim();
+            // Correct selector for the title
+            const title = $(element).find('.uad-col.uad-col-title h1 a').text().trim();
+            console.log(title);
 
             // Check if the listing contains excluded words
             const isExcluded = excludedWords.some(word => {
@@ -226,13 +228,18 @@ async function scrapeListings(url, category) {
                 continue;
             }
 
-            // Extract price, location, and URL
-            const priceText = $(element).find('.uad-price').text().trim();
-            const location = $(element).find('.uad-light').text().trim();
-            const listingUrl = $(element).find('a.uad-image').attr('href').trim();
-
+            // Correct selector for the price (use the first occurrence only)
+            const priceText = $(element).find('.uad-col.uad-col-title .uad-price span.text-nowrap').first().text().trim();
             const price = parseInt(priceText.replace(/\s/g, '').replace('Ft', ''), 10);
+
+            // Extract location
+            const location = $(element).find('.uad-cities').text().trim();
+
+            // Extract URL
+            const listingUrl = $(element).find('a.uad-image').attr('href').trim();
             const fullUrl = listingUrl;
+
+            console.log(price);
 
             // Check if the listing already exists in the database
             const existingListing = await new Promise((resolve, reject) => {
@@ -273,8 +280,6 @@ async function scrapeListings(url, category) {
                 console.log(`Added new listing: ${title} (${price} Ft, Speed: ${speed || 'N/A'})`);
             } else {
                 console.log(`Listing already exists: ${title}`);
-
-
             }
         }
 
@@ -423,19 +428,19 @@ async function getFilteredListings(query, category, speed) {
             WHERE (
                 title LIKE ? OR 
                 title LIKE ? OR 
-                title LIKE ? OR 
-                title = ? OR
                 title LIKE ?
+                
+                
             ) 
             AND category = ?`;
 
-        // Add spaces around the query to enforce word-like matching
+        // Add spaces around the query to enforce word-like matching REMOVED ONE title = ? OR
         const params = [
             `% ${query} %`,  // Surrounded by spaces (middle of title)
             `${query} %`,    // At the start followed by a space
             `% ${query}`,    // At the end preceded by a space
-            `${query}`,      // Exact match (e.g., "4070")
-            `%${query.toUpperCase()}%`,    // Uppercase match (e.g., "RTX")
+            //`${query}`,      // Exact match (e.g., "4070")
+            
             category.toLowerCase()
         ];
 
@@ -496,6 +501,7 @@ function preprocessQuery(query) {
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -506,6 +512,8 @@ app.set('trust proxy', 1);
 app.get('/status', (req, res) => {
     res.json({ status: 'online' });
 });
+
+
 
 // Start server
 app.listen(port, () => console.log(`Server listening on port ${port}`));
